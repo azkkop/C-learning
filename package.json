@@ -1,0 +1,13 @@
+{
+  "name": "programming-learning",
+  "version": "1.0.0",
+  "private": true,
+  "description": "C# 콘솔 프로그래밍 20스테이지 학습 사이트 (Cloudflare Pages)",
+  "scripts": {
+    "deploy": "wrangler pages deploy . --project-name=programming-learning",
+    "preview": "wrangler pages dev ."
+  },
+  "devDependencies": {
+    "wrangler": "^4.14.0"
+  }
+}
