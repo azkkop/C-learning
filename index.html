@@ -131,6 +131,14 @@
                 <span>실행만 = 테스트 없이 출력 확인</span>
             </div>
 
+            <div id="hint-workspace" class="hidden shrink-0 px-4 py-2.5 bg-amber-950/40 border-b border-amber-800/50 text-xs text-amber-100 leading-relaxed">
+                <div class="flex items-start gap-2">
+                    <span class="text-amber-300 font-bold shrink-0">💡 힌트</span>
+                    <p id="hint-workspace-text" class="flex-1"></p>
+                    <button type="button" id="hint-workspace-close" class="text-amber-400/70 hover:text-amber-200 shrink-0 text-[10px]">닫기</button>
+                </div>
+            </div>
+
             <div class="editor-section flex-1 flex overflow-hidden relative min-h-0">
                 <div class="w-10 sm:w-12 bg-slate-950 text-right pr-2 sm:pr-3 select-none py-4 border-r border-slate-800 text-slate-600 font-mono text-xs leading-relaxed overflow-hidden" id="line-numbers"></div>
                 <textarea id="code-editor" class="flex-1 indent-guided text-slate-100 p-4 focus:outline-none resize-none code-font text-xs leading-relaxed whitespace-pre outline-none" spellcheck="false" autocomplete="off"></textarea>

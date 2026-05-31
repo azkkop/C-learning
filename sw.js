@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codexam-lab-v6';
+const CACHE_NAME = 'codexam-lab-v7';
 const ASSETS = [
     '/',
     '/index.html',

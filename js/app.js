@@ -12,15 +12,21 @@ const App = {
 function init() {
     applySiteBranding();
     cacheElements();
-    loadStorage();
-    parseStageFromUrl();
-    renderTabs();
-    loadProblem(App.currentProblemId);
-    updateProgress();
-    setupEditorEvents();
     setupActionEvents();
+    setupEditorEvents();
     setupMobileTabs();
     setupImportExport();
+
+    try {
+        loadStorage();
+        parseStageFromUrl();
+        renderTabs();
+        loadProblem(App.currentProblemId);
+        updateProgress();
+    } catch (err) {
+        console.error('[CodeExam Lab] 초기화 오류:', err);
+    }
+
     registerServiceWorker();
     syncUrlStage();
     window.addEventListener('beforeunload', flushSaveCurrentCode);
@@ -58,6 +64,9 @@ function cacheElements() {
         btnExport: document.getElementById('btn-export'),
         btnImport: document.getElementById('btn-import'),
         hintPanel: document.getElementById('hint-panel'),
+        hintWorkspace: document.getElementById('hint-workspace'),
+        hintWorkspaceText: document.getElementById('hint-workspace-text'),
+        hintWorkspaceClose: document.getElementById('hint-workspace-close'),
         importInput: document.getElementById('import-input'),
         toast: document.getElementById('success-toast'),
         modalContainer: document.getElementById('modal-container'),
@@ -125,7 +134,7 @@ function renderTabs() {
         tab.addEventListener('click', () => {
             saveCurrentCode();
             App.currentProblemId = index;
-            App.hintVisible = false;
+            hideHintPanel();
             renderTabs();
             loadProblem(index);
             syncUrlStage();
@@ -171,9 +180,12 @@ function loadProblem(id) {
         testContainer.appendChild(item);
     });
 
-    const hint = STAGE_HINTS[id] || '';
+    const hint = getStageHint(id);
     if (App.els.hintPanel) {
         App.els.hintPanel.textContent = hint;
+    }
+    if (App.els.hintWorkspaceText) {
+        App.els.hintWorkspaceText.textContent = hint;
     }
     updateHintPanelVisibility();
 
@@ -221,6 +233,7 @@ function updateLineNumbers() {
 
 function setupEditorEvents() {
     const codeEditor = App.els.codeEditor;
+    if (!codeEditor) return;
 
     codeEditor.addEventListener('input', () => {
         updateLineNumbers();
@@ -352,31 +365,54 @@ function saveCurrentCode() {
     flushSaveCurrentCode();
 }
 
+function getStageHint(problemIndex) {
+    if (typeof STAGE_HINTS === 'undefined') return '';
+    const prob = PROBLEMS[problemIndex];
+    return STAGE_HINTS[problemIndex] || (prob ? STAGE_HINTS[prob.id] : '') || '';
+}
+
 function updateHintPanelVisibility() {
-    const hint = STAGE_HINTS[App.currentProblemId] || '';
+    const hint = getStageHint(App.currentProblemId);
+    const show = App.hintVisible && !!hint;
+
     if (App.els.hintPanel) {
-        App.els.hintPanel.classList.toggle('hidden', !App.hintVisible || !hint);
+        App.els.hintPanel.classList.toggle('hidden', !show);
+    }
+    if (App.els.hintWorkspace) {
+        App.els.hintWorkspace.classList.toggle('hidden', !show);
     }
     if (App.els.btnHint) {
-        App.els.btnHint.classList.toggle('ring-2', App.hintVisible && !!hint);
-        App.els.btnHint.classList.toggle('ring-amber-500/60', App.hintVisible && !!hint);
-        App.els.btnHint.setAttribute('aria-pressed', App.hintVisible && !!hint ? 'true' : 'false');
+        App.els.btnHint.classList.toggle('ring-2', show);
+        App.els.btnHint.classList.toggle('ring-amber-500/60', show);
+        App.els.btnHint.setAttribute('aria-pressed', show ? 'true' : 'false');
+        App.els.btnHint.textContent = show ? '힌트 ON' : '힌트';
     }
 }
 
 function toggleHintPanel() {
-    const hint = STAGE_HINTS[App.currentProblemId];
-    if (!hint) return;
+    const hint = getStageHint(App.currentProblemId);
+    if (!hint) {
+        showModal('힌트 없음', '이 스테이지에 등록된 힌트가 없습니다.', [
+            { text: '확인', primary: true, handler: () => {} }
+        ]);
+        return;
+    }
 
     App.hintVisible = !App.hintVisible;
     updateHintPanelVisibility();
 
     if (App.hintVisible) {
-        setMobileTab('problem');
+        setMobileTab('code');
         requestAnimationFrame(() => {
+            App.els.hintWorkspace?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             App.els.hintPanel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     }
+}
+
+function hideHintPanel() {
+    App.hintVisible = false;
+    updateHintPanelVisibility();
 }
 
 function updateProgress() {
@@ -386,9 +422,9 @@ function updateProgress() {
 }
 
 function setupActionEvents() {
-    App.els.btnRun.addEventListener('click', () => { setMobileTab('console'); executeCode(); });
+    App.els.btnRun?.addEventListener('click', () => { setMobileTab('console'); executeCode(); });
     App.els.btnRunOnly?.addEventListener('click', () => { setMobileTab('console'); executeRunOnly(); });
-    App.els.btnReset.addEventListener('click', () => {
+    App.els.btnReset?.addEventListener('click', () => {
         showModal('코드 초기화', '보일러플레이트로 되돌리시겠습니까?', [
             { text: '취소', primary: false, handler: () => {} },
             { text: '초기화', primary: true, handler: () => {
@@ -399,12 +435,13 @@ function setupActionEvents() {
             }}
         ]);
     });
-    App.els.btnFormat.addEventListener('click', () => {
+    App.els.btnFormat?.addEventListener('click', () => {
         autoFormatCode();
         appendLog('[알림] 코드 자동 정렬 완료', 'text-emerald-400');
     });
-    App.els.btnClear.addEventListener('click', clearConsole);
+    App.els.btnClear?.addEventListener('click', clearConsole);
     App.els.btnHint?.addEventListener('click', toggleHintPanel);
+    App.els.hintWorkspaceClose?.addEventListener('click', hideHintPanel);
 }
 
 function clearConsole() {
