@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Pretendard:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Pretendard', sans-serif;
+}
+
+.code-font {
+    font-family: 'Fira Code', monospace;
+}
+
+.indent-guided {
+    background-image:
+        repeating-linear-gradient(to right,
+            transparent 0px,
+            transparent calc(4ch - 1px),
+            rgba(71, 85, 105, 0.08) calc(4ch - 1px),
+            rgba(71, 85, 105, 0.08) 4ch
+        );
+    background-size: 4ch 100%;
+    background-color: #020617;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Mobile panel tabs */
+.mobile-tabs {
+    display: none;
+}
+
+@media (max-width: 1023px) {
+    .mobile-tabs {
+        display: flex;
+    }
+
+    .main-panels {
+        padding-bottom: 3.5rem;
+    }
+
+    .panel-pane {
+        display: none;
+        width: 100% !important;
+        height: 100%;
+    }
+
+    .panel-pane.active {
+        display: flex;
+    }
+
+    .panel-problem.active {
+        flex-direction: column;
+    }
+
+    .panel-workspace.active {
+        flex-direction: column;
+    }
+
+    body.mobile-tab-problem .panel-problem { display: flex; }
+    body.mobile-tab-code .panel-workspace { display: flex; }
+    body.mobile-tab-console .panel-workspace { display: flex; }
+    body.mobile-tab-console .editor-section { display: none; }
+    body.mobile-tab-console .console-section { flex: 1; height: auto !important; }
+
+    body.mobile-tab-problem .panel-problem { display: flex; }
+    body.mobile-tab-code .panel-workspace,
+    body.mobile-tab-console .panel-workspace { display: flex; }
+
+    body:not(.mobile-tab-problem) .panel-problem { display: none !important; }
+    body:not(.mobile-tab-code):not(.mobile-tab-console) .panel-workspace { display: none !important; }
+}
+
+.mobile-tab-btn.active {
+    color: #c084fc;
+    background: rgba(88, 28, 135, 0.35);
+    border-color: rgba(168, 85, 247, 0.45);
+}
