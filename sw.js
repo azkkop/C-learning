@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codexam-lab-v2';
+const CACHE_NAME = 'codexam-lab-v3';
 const ASSETS = [
     '/',
     '/index.html',
@@ -10,14 +10,9 @@ const ASSETS = [
     '/js/problems.js',
     '/js/transpiler.js',
     '/js/storage.js',
-    '/js/editor.js',
     '/js/app.js',
     '/js/runner.js',
-    'https://cdn.tailwindcss.com',
-    'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css',
-    'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css',
-    'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js'
+    'https://cdn.tailwindcss.com'
 ];
 
 self.addEventListener('install', (event) => {

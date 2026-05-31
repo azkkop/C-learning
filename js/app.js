@@ -11,11 +11,11 @@ function init() {
     applySiteBranding();
     cacheElements();
     loadStorage();
-    initCodeEditor();
     parseStageFromUrl();
     renderTabs();
     loadProblem(App.currentProblemId);
     updateProgress();
+    setupEditorEvents();
     setupActionEvents();
     setupMobileTabs();
     setupImportExport();
@@ -42,6 +42,8 @@ function loadStorage() {
 function cacheElements() {
     App.els = {
         problemTabs: document.getElementById('problem-tabs'),
+        codeEditor: document.getElementById('code-editor'),
+        lineNumbers: document.getElementById('line-numbers'),
         consoleLogs: document.getElementById('console-logs'),
         consoleIndicator: document.getElementById('console-indicator'),
         btnRun: document.getElementById('btn-run'),
@@ -81,7 +83,6 @@ function setMobileTab(tab) {
     document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tab);
     });
-    refreshEditorLayout();
 }
 
 function setupMobileTabs() {
@@ -189,6 +190,111 @@ function showModal(title, bodyText, actions) {
     App.els.modalContainer.className = 'fixed inset-0 bg-slate-950/80 flex items-center justify-center opacity-100 pointer-events-auto transition-all duration-200 z-50';
 }
 
+function getEditorCode() {
+    return App.els.codeEditor.value;
+}
+
+function setEditorCode(code) {
+    App.els.codeEditor.value = code;
+    updateLineNumbers();
+}
+
+function updateLineNumbers() {
+    const lines = App.els.codeEditor.value.split('\n');
+    const count = Math.max(lines.length, 16);
+    let numHtml = '';
+    for (let i = 1; i <= count; i++) {
+        numHtml += `${i}<br>`;
+    }
+    App.els.lineNumbers.innerHTML = numHtml;
+}
+
+function setupEditorEvents() {
+    const codeEditor = App.els.codeEditor;
+
+    codeEditor.addEventListener('input', () => {
+        updateLineNumbers();
+        saveCurrentCode();
+    });
+
+    codeEditor.addEventListener('scroll', () => {
+        App.els.lineNumbers.scrollTop = codeEditor.scrollTop;
+    });
+
+    codeEditor.addEventListener('keydown', function (e) {
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        const text = this.value;
+
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            this.value = text.substring(0, start) + '    ' + text.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
+            updateLineNumbers();
+            saveCurrentCode();
+        }
+
+        if (e.key === 'Enter') {
+            const charBefore = text.charAt(start - 1);
+            const charAfter = text.charAt(start);
+
+            if (charBefore === '{' && charAfter === '}') {
+                e.preventDefault();
+                const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+                const currentLine = text.substring(lineStart, start);
+                const match = currentLine.match(/^\s*/);
+                const indent = match ? match[0] : '';
+                const insertedText = '\n' + indent + '    \n' + indent;
+                this.value = text.substring(0, start) + insertedText + text.substring(end);
+                this.selectionStart = this.selectionEnd = start + indent.length + 5;
+                updateLineNumbers();
+                saveCurrentCode();
+                return;
+            }
+
+            e.preventDefault();
+            const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+            const currentLine = text.substring(lineStart, start);
+            const match = currentLine.match(/^\s*/);
+            const indent = match ? match[0] : '';
+            const extraIndent = currentLine.trim().endsWith('{') ? '    ' : '';
+            const insertedText = '\n' + indent + extraIndent;
+            this.value = text.substring(0, start) + insertedText + text.substring(end);
+            this.selectionStart = this.selectionEnd = start + insertedText.length;
+            updateLineNumbers();
+            saveCurrentCode();
+        }
+
+        if (e.key === 'F5') {
+            e.preventDefault();
+            setMobileTab('console');
+            executeCode();
+        }
+    });
+}
+
+function autoFormatCode() {
+    const raw = App.els.codeEditor.value;
+    const lines = raw.split('\n');
+    let formattedLines = [];
+    let indentLevel = 0;
+
+    lines.forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('}')) {
+            indentLevel = Math.max(0, indentLevel - 1);
+        }
+        formattedLines.push(trimmed === '' ? '' : '    '.repeat(indentLevel) + trimmed);
+        if (trimmed.endsWith('{')) {
+            indentLevel++;
+        }
+    });
+
+    App.els.codeEditor.value = formattedLines.join('\n');
+    updateLineNumbers();
+    saveCurrentCode();
+}
+
 function closeModal() {
     App.els.modalContainer.className = 'fixed inset-0 bg-slate-950/80 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-200 z-50';
 }
@@ -218,7 +324,7 @@ function setupActionEvents() {
         ]);
     });
     App.els.btnFormat.addEventListener('click', () => {
-        formatEditorCode();
+        autoFormatCode();
         appendLog('[알림] 코드 자동 정렬 완료', 'text-emerald-400');
     });
     App.els.btnClear.addEventListener('click', clearConsole);
@@ -251,4 +357,3 @@ function showToast() {
 }
 
 window.addEventListener('load', init);
-window.addEventListener('resize', refreshEditorLayout);

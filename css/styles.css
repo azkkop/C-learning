@@ -8,6 +8,18 @@ body {
     font-family: 'Fira Code', monospace;
 }
 
+.indent-guided {
+    background-image:
+        repeating-linear-gradient(to right,
+            transparent 0px,
+            transparent calc(4ch - 1px),
+            rgba(71, 85, 105, 0.08) calc(4ch - 1px),
+            rgba(71, 85, 105, 0.08) 4ch
+        );
+    background-size: 4ch 100%;
+    background-color: #020617;
+}
+
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -24,24 +36,6 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #475569;
-}
-
-/* CodeMirror */
-#code-editor-wrap {
-    background: #020617;
-}
-
-#code-editor-wrap .CodeMirror {
-    height: 100% !important;
-    font-family: 'Fira Code', monospace;
-    font-size: 12px;
-    line-height: 1.6;
-    background: #020617 !important;
-}
-
-#code-editor-wrap .CodeMirror-gutters {
-    background: #020617 !important;
-    border-right: 1px solid #1e293b !important;
 }
 
 .kbd {

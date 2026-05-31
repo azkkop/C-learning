@@ -13,8 +13,6 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/assets/favicon.svg">
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden mobile-tab-problem">
@@ -126,15 +124,13 @@
             <div class="hidden sm:flex px-4 py-1.5 bg-slate-950/80 border-b border-slate-800/60 text-[10px] text-slate-500 gap-4 shrink-0">
                 <span><kbd class="kbd">F5</kbd> 실행</span>
                 <span><kbd class="kbd">Tab</kbd> 들여쓰기</span>
-                <span><kbd class="kbd">Ctrl+/</kbd> 주석</span>
                 <span class="text-slate-600">|</span>
                 <span>$"..." · foreach · switch · Random 지원</span>
             </div>
 
-            <div class="editor-section flex-1 overflow-hidden relative min-h-0">
-                <div id="code-editor-wrap" class="h-full w-full">
-                    <textarea id="code-editor"></textarea>
-                </div>
+            <div class="editor-section flex-1 flex overflow-hidden relative min-h-0">
+                <div class="w-10 sm:w-12 bg-slate-950 text-right pr-2 sm:pr-3 select-none py-4 border-r border-slate-800 text-slate-600 font-mono text-xs leading-relaxed overflow-hidden" id="line-numbers"></div>
+                <textarea id="code-editor" class="flex-1 indent-guided text-slate-100 p-4 focus:outline-none resize-none code-font text-xs leading-relaxed whitespace-pre outline-none" spellcheck="false" autocomplete="off"></textarea>
             </div>
 
             <div class="console-section h-[160px] sm:h-[200px] bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
@@ -184,9 +180,6 @@
     <script src="/js/problems.js"></script>
     <script src="/js/transpiler.js"></script>
     <script src="/js/storage.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
-    <script src="/js/editor.js"></script>
     <script src="/js/runner.js"></script>
     <script src="/js/app.js"></script>
 </body>
