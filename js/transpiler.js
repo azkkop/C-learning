@@ -1,3 +1,74 @@
+function transpileInterpolatedStrings(code) {
+    let out = '';
+    let i = 0;
+
+    while (i < code.length) {
+        const isInterp = code[i] === '$' && code[i + 1] === '"';
+        const isVerbatimInterp = code[i] === '$' && code[i + 1] === '@' && code[i + 2] === '"';
+        const isAltVerbatimInterp = code[i] === '@' && code[i + 1] === '$' && code[i + 2] === '"';
+
+        if (isInterp || isVerbatimInterp || isAltVerbatimInterp) {
+            const verbatim = isVerbatimInterp || isAltVerbatimInterp;
+            i += verbatim ? 3 : 2;
+            out += '`';
+
+            while (i < code.length) {
+                if (verbatim && code[i] === '"' && code[i + 1] === '"') {
+                    i += 2;
+                    out += '`';
+                    break;
+                }
+                if (!verbatim && code[i] === '\\' && i + 1 < code.length) {
+                    out += code[i] + code[i + 1];
+                    i += 2;
+                    continue;
+                }
+                if (!verbatim && code[i] === '"') {
+                    i++;
+                    out += '`';
+                    break;
+                }
+
+                if (code[i] === '{' && code[i + 1] === '{') {
+                    out += '{';
+                    i += 2;
+                    continue;
+                }
+                if (code[i] === '}' && code[i + 1] === '}') {
+                    out += '}';
+                    i += 2;
+                    continue;
+                }
+                if (code[i] === '{') {
+                    let j = i + 1;
+                    let depth = 1;
+                    while (j < code.length && depth > 0) {
+                        if (code[j] === '{') depth++;
+                        else if (code[j] === '}') depth--;
+                        j++;
+                    }
+                    if (depth === 0) {
+                        const inner = code.substring(i + 1, j - 1);
+                        const expr = inner.split(':')[0].split(',')[0].trim();
+                        out += '${' + expr + '}';
+                        i = j;
+                        continue;
+                    }
+                }
+
+                out += code[i];
+                i++;
+            }
+            continue;
+        }
+
+        out += code[i];
+        i++;
+    }
+
+    return out;
+}
+
 function extractMethodBody(code, methodName) {
     let clean = code.replace(/\/\/.*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
     const signatureRegex = new RegExp(`(?:public|private|static|virtual|override|\\s)+[a-zA-Z0-9_<>\\[\\]]+\\s+${methodName}\\s*\\(([^)]*)\\)\\s*\\{`);
@@ -40,6 +111,8 @@ function processBraceMatching(cleanText, matchResult) {
 function transpileCSharpToJS(code) {
     let js = code;
 
+    js = transpileInterpolatedStrings(js);
+
     js = js.replace(/using\s+System\s*;/g, '');
     js = js.replace(/using\s+System\.Threading\s*;/g, '');
 
@@ -57,21 +130,21 @@ function transpileCSharpToJS(code) {
     const csTypes = ['int', 'float', 'double', 'bool', 'string', 'var'];
     csTypes.forEach(type => {
         const regex = new RegExp(`\\b${type}\\s+([a-zA-Z0-9_]+)\\b`, 'g');
-        js = js.replace(regex, 'let $1');
+        js = js.replace(regex, (_, name) => `let ${name}`);
     });
 
-    js = js.replace(/(?:int|float|double|string|bool)\[\s*\]\s*([a-zA-Z0-9_]+)\s*=\s*new\s+(?:int|float|double|string|bool)\[\s*\d*\s*\]\s*\{([^}]*)\}/g, 'let $1 = [$2]');
+    js = js.replace(/(?:int|float|double|string|bool)\[\s*\]\s*([a-zA-Z0-9_]+)\s*=\s*new\s+(?:int|float|double|string|bool)\[\s*\d*\s*\]\s*\{([^}]*)\}/g, (_, name, values) => `let ${name} = [${values}]`);
     js = js.replace(/(?:int|float|double|string|bool)\[\s*\]\s*([a-zA-Z0-9_]+)\s*=\s*new\s+(?:int|float|double|string|bool)\[\s*([^\]]*)\s*\]/g, (m, name, size) => {
         const cleanSize = size.trim();
         return `let ${name} = new Array(${cleanSize || 0}).fill(0)`;
     });
 
-    js = js.replace(/(\w+)\.Length\b/g, '$1.length');
+    js = js.replace(/(\w+)\.Length\b/g, (_, name) => `${name}.length`);
     js = js.replace(/(?:int|float|double|Convert)\.Parse\b/g, 'Number');
     js = js.replace(/Convert\.ToInt32\b/g, 'Math.round');
     js = js.replace(/Console\.Clear\(\)/g, 'Console.Clear()');
 
-    js = js.replace(/(\d+(\.\d+)?)[fF]\b/g, '$1');
+    js = js.replace(/(\d+(\.\d+)?)[fF]\b/g, (_, num) => num);
 
     js = js.replace(/Math\.(Max|Min|Abs|Round)/g, (m, p) => `Math.${p.toLowerCase()}`);
 
