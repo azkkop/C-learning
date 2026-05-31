@@ -59,7 +59,7 @@ function runAllTests() {
 
     try {
         const transpiled = transpileCSharpToJS(rawCode);
-        const validation = validateTranspiled(transpiled);
+        const validation = validateTranspiled(transpiled, rawCode);
 
         if (!validation.ok) {
             throw new Error(`문법 변환 오류: ${validation.message}\n\n💡 C# 문자열 보간($"...")은 지원됩니다. foreach, switch, Random도 사용 가능합니다.`);

@@ -68,7 +68,7 @@
                 rules: "<strong>출력 명세:</strong><br>성공할 때마다 <code>\"[단계]단계 강화 성공\"</code> 출력.<br>강화석 부족 시 <code>\"강화석 부족. 최종단계: [단계]\"</code> 형식으로 안전하게 끝맺음 하세요.",
                 boilerplate: `using System;\n\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        \n    }\n}`,
                 testcases: [
-                    { inputs: ["10", "1", "1", "1", "1"], expected: ["1단계 강화 성공", "2단계 강화 성공", "3단계 강화 성공", "강화석 부족"], display: "강화석 10개로 순차 소모 시도" }
+                    { inputs: ["10", "1", "1", "1", "1", "1"], expected: ["1단계 강화 성공", "2단계 강화 성공", "3단계 강화 성공", "4단계 강화 성공", "강화석 부족. 최종단계: 5"], display: "강화석 10개 — 4회 성공 후 5단계 시도 시 부족" }
                 ]
             },
             {
@@ -85,7 +85,7 @@
                 rules: "구매 완료 시 <code>\"남은 골드: [금액]\"</code> 출력.<br>골드 부족 시 <code>\"골드 부족\"</code> 출력.<br>종료 시 <code>\"상점 종료. 최종 잔액: [금액]\"</code>을 출력하세요.",
                 boilerplate: `using System;\n\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        \n    }\n}`,
                 testcases: [
-                    { inputs: ["100", "1", "2", "1", "0"], expected: ["남은 골드: 50", "남은 골드: 20", "골드 부족", "최종 잔액: 20"], display: "100골드로 대검 ➔ 방패 ➔ 대검(실패) ➔ 종료" }
+                    { inputs: ["100", "1", "2", "1", "0"], expected: ["남은 골드: 50", "남은 골드: 20", "골드 부족", "상점 종료. 최종 잔액: 20"], display: "100골드로 대검 ➔ 방패 ➔ 대검(실패) ➔ 종료" }
                 ]
             },
             {
@@ -136,7 +136,7 @@
                 rules: "매 이동 완료 시 <code>\"현재 위치: ([X], [Y])\"</code> 포맷으로 정확히 출력할 것.<br>종료 명령 시 <code>\"탐색 종료. 최종 좌표: ([X], [Y])\"</code>를 출력하세요.",
                 boilerplate: `using System;\n\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        \n    }\n}`,
                 testcases: [
-                    { inputs: ["W", "D", "D", "S", "Q"], expected: ["(0, 1)", "(1, 1)", "(2, 1)", "(2, 0)", "탐색 종료. 최종 좌표: (2, 0)"], display: "상 ➔ 우 ➔ 우 ➔ 하 탐색 시퀀스" }
+                    { inputs: ["W", "D", "D", "S", "Q"], expected: ["현재 위치: (0, 1)", "현재 위치: (1, 1)", "현재 위치: (2, 1)", "현재 위치: (2, 0)", "탐색 종료. 최종 좌표: (2, 0)"], display: "상 ➔ 우 ➔ 우 ➔ 하 탐색 시퀀스" }
                 ]
             },
             {
@@ -220,7 +220,7 @@
                 rules: "정상 분배 완료 시 <code>\"인당 분배 골드: [몫]\"</code>과 <code>\"남은 골드: [나머지]\"</code> 형식을 만족하세요.",
                 boilerplate: `using System;\n\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        \n    }\n}`,
                 testcases: [
-                    { inputs: ["100", "0", "-3", "4"], expected: ["분배 불가능. 다시 입력", "인당 분배 골드: 25"], display: "0명, 음수명 필터링 후 4명으로 정상 분배 완료" }
+                    { inputs: ["100", "0", "-3", "4"], expected: ["분배 불가능. 다시 입력", "인당 분배 골드: 25", "남은 골드: 0"], display: "0명, 음수명 필터링 후 4명으로 정상 분배 완료" }
                 ]
             },
             {
