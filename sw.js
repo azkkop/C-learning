@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codexam-lab-v4';
+const CACHE_NAME = 'codexam-lab-v5';
 const ASSETS = [
     '/',
     '/index.html',
@@ -9,6 +9,8 @@ const ASSETS = [
     '/js/hints.js',
     '/js/problems.js',
     '/js/transpiler.js',
+    '/js/grader.js',
+    '/js/exec-worker.js',
     '/js/storage.js',
     '/js/app.js',
     '/js/runner.js',

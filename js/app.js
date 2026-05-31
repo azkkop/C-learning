@@ -4,6 +4,8 @@ const App = {
     userCodes: {},
     mobileTab: 'problem',
     hintVisible: false,
+    saveTimer: null,
+    lastSavedAt: null,
     els: {}
 };
 
@@ -21,6 +23,7 @@ function init() {
     setupImportExport();
     registerServiceWorker();
     syncUrlStage();
+    window.addEventListener('beforeunload', flushSaveCurrentCode);
 }
 
 function applySiteBranding() {
@@ -47,6 +50,7 @@ function cacheElements() {
         consoleLogs: document.getElementById('console-logs'),
         consoleIndicator: document.getElementById('console-indicator'),
         btnRun: document.getElementById('btn-run'),
+        btnRunOnly: document.getElementById('btn-run-only'),
         btnReset: document.getElementById('btn-reset'),
         btnFormat: document.getElementById('btn-format'),
         btnClear: document.getElementById('btn-clear'),
@@ -59,7 +63,9 @@ function cacheElements() {
         modalContainer: document.getElementById('modal-container'),
         modalTitle: document.getElementById('modal-title'),
         modalBody: document.getElementById('modal-body'),
-        modalActions: document.getElementById('modal-actions')
+        modalActions: document.getElementById('modal-actions'),
+        saveStatus: document.getElementById('save-status'),
+        runOnlyInput: document.getElementById('run-only-input')
     };
 }
 
@@ -160,7 +166,8 @@ function loadProblem(id) {
     prob.testcases.forEach(tc => {
         const item = document.createElement('div');
         item.className = 'bg-slate-950 px-2.5 py-1.5 rounded border border-slate-800/80 text-[11px] text-slate-300 font-mono space-y-0.5';
-        item.innerHTML = `<div class="truncate">입력: [ ${tc.inputs.map(i => `"${i}"`).join(', ')} ]</div><div class="text-slate-500">기대: ${tc.expected.map(e => `"${e}"`).join(', ')}</div>`;
+        const mode = tc.mode || prob.grading || SITE_CONFIG.defaultGradingMode;
+        item.innerHTML = `<div class="truncate">입력: [ ${tc.inputs.map(i => `"${i}"`).join(', ')} ]</div><div class="text-slate-500">기대: ${tc.expected.map(e => `"${e}"`).join(', ')}</div><div class="text-slate-600 text-[10px]">채점: ${formatGradingModeLabel(mode)}</div>`;
         testContainer.appendChild(item);
     });
 
@@ -171,9 +178,12 @@ function loadProblem(id) {
     }
 
     setEditorCode(App.userCodes[id] || prob.boilerplate);
+    if (App.els.runOnlyInput && prob.testcases[0]) {
+        App.els.runOnlyInput.value = prob.testcases[0].inputs.join('\n');
+    }
     clearConsole();
     appendLog(`// ${prob.num}: ${prob.title}`, 'text-slate-500');
-    appendLog('// [F5] 실행 · [Tab] 들여쓰기 · 힌트 버튼으로 단계별 가이드 확인', 'text-slate-500');
+    appendLog('// F5 또는 Ctrl+Enter 채점 · 실행만 버튼은 테스트 없이 출력 확인', 'text-slate-500');
 }
 
 function showModal(title, bodyText, actions) {
@@ -214,7 +224,7 @@ function setupEditorEvents() {
 
     codeEditor.addEventListener('input', () => {
         updateLineNumbers();
-        saveCurrentCode();
+        scheduleSaveCurrentCode();
     });
 
     codeEditor.addEventListener('scroll', () => {
@@ -226,12 +236,18 @@ function setupEditorEvents() {
         const end = this.selectionEnd;
         const text = this.value;
 
+        if (e.key === 'F5') {
+            e.preventDefault();
+            setMobileTab('console');
+            executeCode();
+        }
+
         if (e.key === 'Tab') {
             e.preventDefault();
             this.value = text.substring(0, start) + '    ' + text.substring(end);
             this.selectionStart = this.selectionEnd = start + 4;
             updateLineNumbers();
-            saveCurrentCode();
+            scheduleSaveCurrentCode();
         }
 
         if (e.key === 'Enter') {
@@ -248,7 +264,7 @@ function setupEditorEvents() {
                 this.value = text.substring(0, start) + insertedText + text.substring(end);
                 this.selectionStart = this.selectionEnd = start + indent.length + 5;
                 updateLineNumbers();
-                saveCurrentCode();
+                scheduleSaveCurrentCode();
                 return;
             }
 
@@ -262,13 +278,18 @@ function setupEditorEvents() {
             this.value = text.substring(0, start) + insertedText + text.substring(end);
             this.selectionStart = this.selectionEnd = start + insertedText.length;
             updateLineNumbers();
-            saveCurrentCode();
+            scheduleSaveCurrentCode();
         }
 
-        if (e.key === 'F5') {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
             setMobileTab('console');
             executeCode();
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            flushSaveCurrentCode();
         }
     });
 }
@@ -292,16 +313,43 @@ function autoFormatCode() {
 
     App.els.codeEditor.value = formattedLines.join('\n');
     updateLineNumbers();
-    saveCurrentCode();
+    scheduleSaveCurrentCode();
 }
 
 function closeModal() {
     App.els.modalContainer.className = 'fixed inset-0 bg-slate-950/80 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-200 z-50';
 }
 
-function saveCurrentCode() {
+function scheduleSaveCurrentCode() {
+    if (App.els.saveStatus) {
+        App.els.saveStatus.textContent = '저장 대기…';
+        App.els.saveStatus.className = 'text-[10px] text-amber-400/80 shrink-0';
+    }
+    clearTimeout(App.saveTimer);
+    App.saveTimer = setTimeout(flushSaveCurrentCode, SITE_CONFIG.autoSaveDelayMs);
+}
+
+function flushSaveCurrentCode() {
+    clearTimeout(App.saveTimer);
     App.userCodes[App.currentProblemId] = getEditorCode();
     saveProgressToStorage();
+    App.lastSavedAt = new Date();
+    updateSaveStatus();
+}
+
+function updateSaveStatus() {
+    if (!App.els.saveStatus) return;
+    if (!App.lastSavedAt) {
+        App.els.saveStatus.textContent = '';
+        return;
+    }
+    const time = App.lastSavedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    App.els.saveStatus.textContent = `저장됨 ${time}`;
+    App.els.saveStatus.className = 'text-[10px] text-emerald-400/80 shrink-0';
+}
+
+function saveCurrentCode() {
+    flushSaveCurrentCode();
 }
 
 function updateProgress() {
@@ -312,6 +360,7 @@ function updateProgress() {
 
 function setupActionEvents() {
     App.els.btnRun.addEventListener('click', () => { setMobileTab('console'); executeCode(); });
+    App.els.btnRunOnly?.addEventListener('click', () => { setMobileTab('console'); executeRunOnly(); });
     App.els.btnReset.addEventListener('click', () => {
         showModal('코드 초기화', '보일러플레이트로 되돌리시겠습니까?', [
             { text: '취소', primary: false, handler: () => {} },

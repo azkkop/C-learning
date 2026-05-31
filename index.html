@@ -109,8 +109,10 @@
                     <span class="w-3 h-3 rounded-full bg-yellow-500/80 shrink-0"></span>
                     <span class="w-3 h-3 rounded-full bg-green-500/80 shrink-0"></span>
                     <span class="text-xs text-slate-400 ml-1 font-mono truncate">Program.cs</span>
+                    <span id="save-status" class="text-[10px] text-slate-500 shrink-0"></span>
                 </div>
                 <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap justify-end">
+                    <button id="btn-run-only" type="button" class="px-2 sm:px-3 py-1.5 text-[11px] font-medium text-cyan-200 bg-cyan-950/40 hover:bg-cyan-950/60 border border-cyan-900/40 rounded transition">실행만</button>
                     <button id="btn-hint" type="button" class="px-2 py-1.5 text-[11px] font-medium text-amber-300 bg-amber-950/30 hover:bg-amber-950/50 border border-amber-900/40 rounded transition">힌트</button>
                     <button id="btn-format" type="button" class="px-2 py-1.5 text-[11px] font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition">정렬</button>
                     <button id="btn-reset" type="button" class="px-2 py-1.5 text-[11px] font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition">초기화</button>
@@ -121,11 +123,12 @@
                 </div>
             </div>
 
-            <div class="hidden sm:flex px-4 py-1.5 bg-slate-950/80 border-b border-slate-800/60 text-[10px] text-slate-500 gap-4 shrink-0">
-                <span><kbd class="kbd">F5</kbd> 실행</span>
+            <div class="hidden sm:flex px-4 py-1.5 bg-slate-950/80 border-b border-slate-800/60 text-[10px] text-slate-500 gap-4 shrink-0 flex-wrap">
+                <span><kbd class="kbd">F5</kbd> / <kbd class="kbd">Ctrl+Enter</kbd> 채점</span>
+                <span><kbd class="kbd">Ctrl+S</kbd> 저장</span>
                 <span><kbd class="kbd">Tab</kbd> 들여쓰기</span>
                 <span class="text-slate-600">|</span>
-                <span>$"..." · foreach · switch · Random 지원</span>
+                <span>실행만 = 테스트 없이 출력 확인</span>
             </div>
 
             <div class="editor-section flex-1 flex overflow-hidden relative min-h-0">
@@ -133,13 +136,19 @@
                 <textarea id="code-editor" class="flex-1 indent-guided text-slate-100 p-4 focus:outline-none resize-none code-font text-xs leading-relaxed whitespace-pre outline-none" spellcheck="false" autocomplete="off"></textarea>
             </div>
 
-            <div class="console-section h-[160px] sm:h-[200px] bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
-                <div class="bg-slate-950 px-4 py-2 border-b border-slate-900 flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="console-indicator"></span>
-                        실행 결과
-                    </span>
-                    <button id="btn-clear" type="button" class="text-slate-500 hover:text-slate-300 text-xs transition">지우기</button>
+            <div class="console-section h-[200px] sm:h-[240px] bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
+                <div class="bg-slate-950 px-4 py-2 border-b border-slate-900 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="console-indicator"></span>
+                            실행 결과
+                        </span>
+                        <button id="btn-clear" type="button" class="text-slate-500 hover:text-slate-300 text-xs transition">지우기</button>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <label class="text-[10px] text-slate-500 shrink-0 pt-1.5 sm:w-16">실행만 입력</label>
+                        <textarea id="run-only-input" rows="2" class="flex-1 bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-[11px] text-slate-200 font-mono resize-none focus:outline-none focus:border-cyan-800" placeholder="한 줄에 하나씩 입력 (ReadLine 순서)" spellcheck="false"></textarea>
+                    </div>
                 </div>
                 <div class="flex-1 p-3 sm:p-4 overflow-y-auto font-mono text-xs space-y-1 bg-slate-900" id="console-logs"></div>
             </div>
@@ -179,6 +188,7 @@
     <script src="/js/hints.js"></script>
     <script src="/js/problems.js"></script>
     <script src="/js/transpiler.js"></script>
+    <script src="/js/grader.js"></script>
     <script src="/js/storage.js"></script>
     <script src="/js/runner.js"></script>
     <script src="/js/app.js"></script>
