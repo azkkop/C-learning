@@ -3,33 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C# 게임 프로그래밍 종합 마스터 과정</title>
-    <meta name="description" content="C# 콘솔 입출력 20스테이지 연습 및 자동 채점. 반복문, 조건문, 배열 기말 대비 학습 사이트.">
-    <meta property="og:title" content="C# 터미널 게임 프로그래밍 학습">
-    <meta property="og:description" content="20개 스테이지 C# 콘솔 프로그래밍 연습 및 자동 검증">
+    <title>CodeExam Lab — 프로그래밍 시험 대비</title>
+    <meta name="description" content="C# 콘솔 입출력 20스테이지 연습 및 자동 채점. 중간·기말·자격 시험 대비 프로그래밍 실습 플랫폼.">
+    <meta property="og:title" content="CodeExam Lab — 프로그래밍 시험 대비">
+    <meta property="og:description" content="C# 콘솔 프로그래밍 20스테이지 · 실시간 자동 채점 · 오프라인 연습">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#7c3aed">
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/favicon.svg">
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden mobile-tab-problem">
 
-    <header class="bg-slate-900 border-b border-slate-800 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0">
+    <header class="bg-slate-900 border-b border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 gap-3">
         <div class="flex items-center space-x-3 min-w-0">
-            <div class="bg-purple-600 text-white px-3 py-1.5 rounded-lg font-bold code-font text-lg shadow-lg shadow-purple-900/20 shrink-0">C#</div>
+            <div class="bg-purple-600 text-white px-3 py-1.5 rounded-lg font-bold code-font text-sm sm:text-lg shadow-lg shadow-purple-900/20 shrink-0">CE</div>
             <div class="min-w-0">
-                <h1 class="text-sm sm:text-base font-bold tracking-tight truncate">C# 터미널 게임 알고리즘 종합 검증 엔진 <span class="text-purple-400 font-normal text-xs ml-1 sm:ml-2">Total 20 Stages</span></h1>
-                <p class="text-xs text-slate-400 hidden sm:block">태운 님의 기말고사 완벽 대비를 위한 가상 콘솔 스트림 입출력 시뮬레이션 환경</p>
+                <h1 class="text-sm sm:text-base font-bold tracking-tight truncate" id="site-title">CodeExam Lab</h1>
+                <p class="text-[11px] sm:text-xs text-slate-400 truncate" id="site-tagline">프로그래밍 시험 대비 플랫폼</p>
             </div>
         </div>
 
-        <div class="flex items-center space-x-3 sm:space-x-4 shrink-0">
+        <div class="hidden md:flex items-center gap-2 shrink-0">
+            <label class="text-[10px] text-slate-500 uppercase tracking-wider">과정</label>
+            <select id="course-select" class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded px-2 py-1.5" disabled>
+                <option>C# 콘솔 프로그래밍 (20 Stages)</option>
+            </select>
+        </div>
+
+        <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+            <button id="btn-export" type="button" class="hidden sm:inline-flex px-2.5 py-1.5 text-[11px] font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition" title="진행률 백업">백업</button>
+            <button id="btn-import" type="button" class="hidden sm:inline-flex px-2.5 py-1.5 text-[11px] font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition" title="진행률 복원">복원</button>
+            <input type="file" id="import-input" accept="application/json,.json" class="hidden">
             <div class="text-right">
-                <span class="text-xs text-slate-400 block hidden sm:block">종합 진행률</span>
-                <span class="text-xs font-semibold code-font text-purple-400" id="progress-text">0 / 20 완료 (0%)</span>
+                <span class="text-[10px] text-slate-500 block hidden sm:block">진행률</span>
+                <span class="text-xs font-semibold code-font text-purple-400" id="progress-text">0 / 20 (0%)</span>
             </div>
-            <div class="w-20 sm:w-32 bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700/50">
+            <div class="w-16 sm:w-28 bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700/50">
                 <div id="progress-bar" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full w-0 transition-all duration-500"></div>
             </div>
         </div>
@@ -37,107 +51,112 @@
 
     <div class="main-panels flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
-        <!-- Left Pane: Problem Description -->
-        <div id="panel-problem" class="panel-pane panel-problem w-full lg:w-[480px] h-full overflow-y-auto p-4 sm:p-6 bg-slate-900/50 border-r border-slate-800 flex flex-col space-y-6 shrink-0">
+        <div id="panel-problem" class="panel-pane panel-problem w-full lg:w-[440px] xl:w-[480px] h-full overflow-y-auto p-4 sm:p-6 bg-slate-900/50 border-r border-slate-800 flex flex-col space-y-4 shrink-0">
 
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl"></div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
                 <h2 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-1.5 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-purple-500"></span> 훈련 상세 가이드
+                    <span class="w-2 h-2 rounded-full bg-purple-500"></span> 학습 가이드
                 </h2>
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    입출력 흐름과 상호작용 제어문을 직접 구현해야 하는 리얼 콘솔 미션들입니다. 에디터가 자동 들여쓰기 및 중괄호 완성을 지원하므로 편하게 작성해 보세요.
+                    콘솔 입출력·반복문·조건문·배열을 게임 테마 미션으로 연습합니다. 코드 작성 후 <strong class="text-purple-300">F5</strong>로 즉시 채점됩니다. 중간·기말·자격 시험 전 반복 훈련용으로 설계되었습니다.
                 </p>
             </div>
 
             <div>
-                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">미션 스테이지 선택</h3>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">스테이지</h3>
                 <div class="grid grid-cols-4 gap-1.5" id="problem-tabs"></div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex-1 flex flex-col justify-between">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex-1 flex flex-col space-y-4">
                 <div>
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="bg-purple-900/40 text-purple-300 border border-purple-800/50 text-xs px-2 py-0.5 rounded font-semibold" id="prob-num">MISSION 01</span>
-                        <span class="text-xs text-emerald-400 flex items-center gap-1 font-semibold" id="prob-status">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 진행 가능
-                        </span>
+                    <div class="flex justify-between items-start mb-2 gap-2">
+                        <span class="bg-purple-900/40 text-purple-300 border border-purple-800/50 text-xs px-2 py-0.5 rounded font-semibold shrink-0" id="prob-num">STAGE 01</span>
+                        <span class="text-xs text-amber-400 flex items-center gap-1 font-semibold shrink-0" id="prob-status"></span>
                     </div>
                     <h2 class="text-base font-bold text-white mb-2" id="prob-title">로딩 중...</h2>
-                    <p class="text-xs text-slate-300 leading-relaxed mb-4 whitespace-pre-line" id="prob-desc">...</p>
+                    <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-line" id="prob-desc"></p>
+                </div>
 
-                    <div class="space-y-4 border-t border-slate-800 pt-4">
-                        <div>
-                            <span class="text-xs text-slate-400 block mb-1">C# 권장 클래스 스켈레톤</span>
-                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80">
-                                <code class="code-font text-xs text-indigo-300" id="prob-signature">public class Program { ... }</code>
-                            </div>
-                        </div>
+                <div id="hint-panel" class="hidden text-xs text-amber-100 bg-amber-950/20 border border-amber-900/40 rounded-lg p-3 leading-relaxed"></div>
 
-                        <div>
-                            <span class="text-xs text-slate-400 block mb-1">입출력 상호작용 흐름 설명</span>
-                            <div class="text-xs text-slate-300 space-y-1" id="prob-params"></div>
+                <div class="space-y-3 border-t border-slate-800 pt-4">
+                    <div>
+                        <span class="text-xs text-slate-400 block mb-1">클래스 스켈레톤</span>
+                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80">
+                            <code class="code-font text-xs text-indigo-300" id="prob-signature"></code>
                         </div>
-
-                        <div>
-                            <span class="text-xs text-slate-400 block mb-1">최종 성공 조건 및 반환 규격</span>
-                            <div class="text-xs text-rose-200 bg-rose-950/10 border border-rose-900/30 p-3 rounded-lg leading-relaxed" id="prob-rules"></div>
-                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 block mb-1">입출력 흐름</span>
+                        <div class="text-xs text-slate-300 space-y-1" id="prob-params"></div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 block mb-1">성공 조건</span>
+                        <div class="text-xs text-rose-200 bg-rose-950/10 border border-rose-900/30 p-3 rounded-lg leading-relaxed" id="prob-rules"></div>
                     </div>
                 </div>
 
-                <div class="border-t border-slate-800 pt-4 mt-6">
-                    <span class="text-xs text-slate-400 block mb-2 font-semibold">시뮬레이션 입력값 시퀀스</span>
+                <div class="border-t border-slate-800 pt-4">
+                    <span class="text-xs text-slate-400 block mb-2 font-semibold">테스트 입력 시퀀스</span>
                     <div class="space-y-1.5" id="prob-testcases"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Pane: Code Editor & Console -->
         <div id="panel-workspace" class="panel-pane panel-workspace flex-1 h-full flex flex-col overflow-hidden bg-slate-950">
 
-            <div class="bg-slate-900 px-4 sm:px-6 py-3 border-b border-slate-800 flex items-center justify-between shrink-0 gap-2">
-                <div class="flex items-center space-x-2 min-w-0">
+            <div class="bg-slate-900 px-4 sm:px-6 py-2.5 border-b border-slate-800 flex items-center justify-between shrink-0 gap-2">
+                <div class="flex items-center gap-2 min-w-0">
                     <span class="w-3 h-3 rounded-full bg-red-500/80 shrink-0"></span>
                     <span class="w-3 h-3 rounded-full bg-yellow-500/80 shrink-0"></span>
                     <span class="w-3 h-3 rounded-full bg-green-500/80 shrink-0"></span>
-                    <span class="text-xs text-slate-400 ml-2 sm:ml-4 font-mono truncate">Program.cs (가이드라인 켜짐)</span>
+                    <span class="text-xs text-slate-400 ml-1 font-mono truncate">Program.cs</span>
                 </div>
-                <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-                    <button id="btn-format" class="hidden sm:flex px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                        코드 자동 정렬
-                    </button>
-                    <button id="btn-reset" class="px-2 sm:px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white rounded transition">
-                        초기화
-                    </button>
-                    <button id="btn-run" class="px-3 sm:px-5 py-1.5 text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded transition shadow-lg shadow-purple-900/30 flex items-center gap-1.5">
+                <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 flex-wrap justify-end">
+                    <button id="btn-hint" type="button" class="px-2 py-1.5 text-[11px] font-medium text-amber-300 bg-amber-950/30 hover:bg-amber-950/50 border border-amber-900/40 rounded transition">힌트</button>
+                    <button id="btn-format" type="button" class="px-2 py-1.5 text-[11px] font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition">정렬</button>
+                    <button id="btn-reset" type="button" class="px-2 py-1.5 text-[11px] font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 rounded transition">초기화</button>
+                    <button id="btn-run" type="button" class="px-3 sm:px-5 py-1.5 text-[11px] sm:text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded transition shadow-lg shadow-purple-900/30 flex items-center gap-1.5">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
-                        <span class="hidden sm:inline">코드 컴파일 및 검증 [F5]</span>
-                        <span class="sm:hidden">실행</span>
+                        <span class="hidden sm:inline">실행 [F5]</span><span class="sm:hidden">실행</span>
                     </button>
                 </div>
             </div>
 
-            <div class="editor-section flex-1 flex overflow-hidden relative min-h-0">
-                <div class="w-10 sm:w-12 bg-slate-950 text-right pr-2 sm:pr-3 select-none py-4 border-r border-slate-800 text-slate-600 font-mono text-xs leading-relaxed overflow-hidden" id="line-numbers"></div>
-                <textarea id="code-editor" class="flex-1 indent-guided text-slate-100 p-4 focus:outline-none resize-none code-font text-xs leading-relaxed whitespace-pre outline-none animate-none" spellcheck="false" autocomplete="off"></textarea>
+            <div class="hidden sm:flex px-4 py-1.5 bg-slate-950/80 border-b border-slate-800/60 text-[10px] text-slate-500 gap-4 shrink-0">
+                <span><kbd class="kbd">F5</kbd> 실행</span>
+                <span><kbd class="kbd">Tab</kbd> 들여쓰기</span>
+                <span><kbd class="kbd">Ctrl+/</kbd> 주석</span>
+                <span class="text-slate-600">|</span>
+                <span>$"..." · foreach · switch · Random 지원</span>
             </div>
 
-            <div class="console-section h-[180px] sm:h-[220px] bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
-                <div class="bg-slate-950 px-4 sm:px-6 py-2 border-b border-slate-900 flex items-center justify-between">
+            <div class="editor-section flex-1 overflow-hidden relative min-h-0">
+                <div id="code-editor-wrap" class="h-full w-full">
+                    <textarea id="code-editor"></textarea>
+                </div>
+            </div>
+
+            <div class="console-section h-[160px] sm:h-[200px] bg-slate-900 border-t border-slate-800 flex flex-col shrink-0">
+                <div class="bg-slate-950 px-4 py-2 border-b border-slate-900 flex items-center justify-between">
                     <span class="text-xs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-slate-500" id="console-indicator"></span>
-                        C# 디버그 에뮬레이터 출력
+                        실행 결과
                     </span>
-                    <button id="btn-clear" class="text-slate-500 hover:text-slate-300 text-xs transition">지우기</button>
+                    <button id="btn-clear" type="button" class="text-slate-500 hover:text-slate-300 text-xs transition">지우기</button>
                 </div>
-                <div class="flex-1 p-4 overflow-y-auto font-mono text-xs space-y-1.5 bg-slate-900" id="console-logs"></div>
+                <div class="flex-1 p-3 sm:p-4 overflow-y-auto font-mono text-xs space-y-1 bg-slate-900" id="console-logs"></div>
             </div>
         </div>
     </div>
 
-    <!-- Mobile bottom tabs -->
+    <div id="run-overlay" class="hidden fixed inset-0 bg-slate-950/70 z-30 items-center justify-center">
+        <div class="flex flex-col items-center gap-3">
+            <div class="run-spinner"></div>
+            <span class="text-xs text-slate-300 font-medium">컴파일 및 테스트 실행 중...</span>
+        </div>
+    </div>
+
     <nav class="mobile-tabs fixed bottom-0 inset-x-0 bg-slate-900 border-t border-slate-800 z-40 lg:hidden">
         <button type="button" data-tab="problem" class="mobile-tab-btn active flex-1 py-3 text-xs font-semibold text-slate-400 border-t-2 border-transparent transition">문제</button>
         <button type="button" data-tab="code" class="mobile-tab-btn flex-1 py-3 text-xs font-semibold text-slate-400 border-t-2 border-transparent transition">코드</button>
@@ -146,23 +165,29 @@
 
     <div id="modal-container" class="fixed inset-0 bg-slate-950/80 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-200 z-50">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-[400px] max-w-[calc(100%-2rem)] shadow-2xl flex flex-col space-y-4">
-            <h3 class="text-base font-bold text-white flex items-center gap-2" id="modal-title">알림</h3>
-            <p class="text-xs text-slate-400 leading-relaxed" id="modal-body">알림 메시지입니다.</p>
+            <h3 class="text-base font-bold text-white" id="modal-title">알림</h3>
+            <p class="text-xs text-slate-400 leading-relaxed" id="modal-body"></p>
             <div class="flex justify-end space-x-2" id="modal-actions"></div>
         </div>
     </div>
 
     <div id="success-toast" class="fixed bottom-20 lg:bottom-6 right-6 bg-emerald-600 text-white px-6 py-3.5 rounded-xl shadow-2xl shadow-emerald-950/50 flex items-center space-x-3 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none z-50">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <div>
-            <span class="font-bold block text-sm">성공! PASS</span>
-            <span class="text-xs text-emerald-100">이 스테이지의 모든 테스트 케이스를 통과했습니다.</span>
+            <span class="font-bold block text-sm">PASS!</span>
+            <span class="text-xs text-emerald-100">모든 테스트를 통과했습니다.</span>
         </div>
     </div>
 
+    <script src="/js/config.js"></script>
+    <script src="/js/hints.js"></script>
     <script src="/js/problems.js"></script>
     <script src="/js/transpiler.js"></script>
-    <script src="/js/app.js"></script>
+    <script src="/js/storage.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+    <script src="/js/editor.js"></script>
     <script src="/js/runner.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 </html>

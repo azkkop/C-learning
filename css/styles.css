@@ -8,18 +8,6 @@ body {
     font-family: 'Fira Code', monospace;
 }
 
-.indent-guided {
-    background-image:
-        repeating-linear-gradient(to right,
-            transparent 0px,
-            transparent calc(4ch - 1px),
-            rgba(71, 85, 105, 0.08) calc(4ch - 1px),
-            rgba(71, 85, 105, 0.08) 4ch
-        );
-    background-size: 4ch 100%;
-    background-color: #020617;
-}
-
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -38,7 +26,48 @@ body {
     background: #475569;
 }
 
-/* Mobile panel tabs */
+/* CodeMirror */
+#code-editor-wrap {
+    background: #020617;
+}
+
+#code-editor-wrap .CodeMirror {
+    height: 100% !important;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    background: #020617 !important;
+}
+
+#code-editor-wrap .CodeMirror-gutters {
+    background: #020617 !important;
+    border-right: 1px solid #1e293b !important;
+}
+
+.kbd {
+    display: inline-block;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.25rem;
+    background: #1e293b;
+    border: 1px solid #334155;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.65rem;
+    color: #cbd5e1;
+}
+
+.run-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid rgba(168, 85, 247, 0.2);
+    border-top-color: #a855f7;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 .mobile-tabs {
     display: none;
 }
@@ -58,30 +87,15 @@ body {
         height: 100%;
     }
 
-    .panel-pane.active {
-        display: flex;
-    }
-
-    .panel-problem.active {
-        flex-direction: column;
-    }
-
-    .panel-workspace.active {
-        flex-direction: column;
-    }
-
-    body.mobile-tab-problem .panel-problem { display: flex; }
-    body.mobile-tab-code .panel-workspace { display: flex; }
-    body.mobile-tab-console .panel-workspace { display: flex; }
-    body.mobile-tab-console .editor-section { display: none; }
-    body.mobile-tab-console .console-section { flex: 1; height: auto !important; }
-
-    body.mobile-tab-problem .panel-problem { display: flex; }
+    body.mobile-tab-problem .panel-problem { display: flex; flex-direction: column; }
     body.mobile-tab-code .panel-workspace,
-    body.mobile-tab-console .panel-workspace { display: flex; }
+    body.mobile-tab-console .panel-workspace { display: flex; flex-direction: column; }
 
     body:not(.mobile-tab-problem) .panel-problem { display: none !important; }
     body:not(.mobile-tab-code):not(.mobile-tab-console) .panel-workspace { display: none !important; }
+
+    body.mobile-tab-console .editor-section { display: none; }
+    body.mobile-tab-console .console-section { flex: 1; height: auto !important; }
 }
 
 .mobile-tab-btn.active {
