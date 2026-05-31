@@ -174,8 +174,8 @@ function loadProblem(id) {
     const hint = STAGE_HINTS[id] || '';
     if (App.els.hintPanel) {
         App.els.hintPanel.textContent = hint;
-        App.els.hintPanel.classList.toggle('hidden', !App.hintVisible || !hint);
     }
+    updateHintPanelVisibility();
 
     setEditorCode(App.userCodes[id] || prob.boilerplate);
     if (App.els.runOnlyInput && prob.testcases[0]) {
@@ -352,6 +352,33 @@ function saveCurrentCode() {
     flushSaveCurrentCode();
 }
 
+function updateHintPanelVisibility() {
+    const hint = STAGE_HINTS[App.currentProblemId] || '';
+    if (App.els.hintPanel) {
+        App.els.hintPanel.classList.toggle('hidden', !App.hintVisible || !hint);
+    }
+    if (App.els.btnHint) {
+        App.els.btnHint.classList.toggle('ring-2', App.hintVisible && !!hint);
+        App.els.btnHint.classList.toggle('ring-amber-500/60', App.hintVisible && !!hint);
+        App.els.btnHint.setAttribute('aria-pressed', App.hintVisible && !!hint ? 'true' : 'false');
+    }
+}
+
+function toggleHintPanel() {
+    const hint = STAGE_HINTS[App.currentProblemId];
+    if (!hint) return;
+
+    App.hintVisible = !App.hintVisible;
+    updateHintPanelVisibility();
+
+    if (App.hintVisible) {
+        setMobileTab('problem');
+        requestAnimationFrame(() => {
+            App.els.hintPanel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    }
+}
+
 function updateProgress() {
     const percent = Math.round((App.solvedProblems.length / PROBLEMS.length) * 100);
     document.getElementById('progress-text').textContent = `${App.solvedProblems.length} / ${PROBLEMS.length} (${percent}%)`;
@@ -377,12 +404,7 @@ function setupActionEvents() {
         appendLog('[알림] 코드 자동 정렬 완료', 'text-emerald-400');
     });
     App.els.btnClear.addEventListener('click', clearConsole);
-    App.els.btnHint?.addEventListener('click', () => {
-        App.hintVisible = !App.hintVisible;
-        if (App.els.hintPanel) {
-            App.els.hintPanel.classList.toggle('hidden', !App.hintVisible);
-        }
-    });
+    App.els.btnHint?.addEventListener('click', toggleHintPanel);
 }
 
 function clearConsole() {
